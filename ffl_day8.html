@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Fast French Lab — Day 8</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#FFF8F2;color:#2D1B0E;min-height:100vh;font-size:16px}
+:root{
+  --or:#C2410C;--or2:#EA580C;--orb:#FFEDD5;--orl:#FFF7ED;
+  --tl:#0D9488;--tlb:#CCFBF1;--tll:#F0FDFA;
+  --pu:#7C3AED;--pub:#EDE9FE;
+  --gn:#059669;--gnb:#D1FAE5;
+  --rd:#DC2626;--rdb:#FEE2E2;
+  --go:#D97706;--gob:#FEF3C7;
+  --gy:#6B7280;--bdr:#E8D5C0;--wh:#fff;--dk:#2D1B0E;--md:#4B3020;
+  --sh:0 2px 14px rgba(194,65,12,.08);
+}
+.hdr{background:#fff;border-bottom:1.5px solid var(--bdr);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 6px rgba(194,65,12,.07)}
+.logo{font-weight:900;font-size:.9rem;letter-spacing:1.5px;color:var(--dk)}.logo em{color:var(--or2);font-style:normal}
+.day-pill{background:linear-gradient(135deg,var(--or),#9A3412);color:#fff;border-radius:50px;padding:4px 14px;font-size:.72rem;font-weight:800}
+.prog-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.prog-lbl{font-size:.57rem;color:var(--gy);font-weight:600}
+.prog-rail{width:100px;height:4px;background:var(--bdr);border-radius:10px}
+.prog-bar{height:4px;background:linear-gradient(90deg,var(--or2),var(--pu));border-radius:10px;transition:width .5s ease;width:0%}
+.wrap{max-width:680px;margin:0 auto;padding:16px 13px 90px}
+.dots{display:flex;gap:5px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.dot{width:32px;height:32px;border-radius:50%;background:#EDD8C4;color:var(--gy);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .25s;border:2px solid transparent;min-height:44px;min-width:44px}
+.dot.active{background:var(--or);color:#fff;border-color:var(--or2);box-shadow:0 4px 12px rgba(194,65,12,.3)}
+.dot.done{background:var(--gnb);color:var(--gn);border-color:#6EE7B7}
+.sec{display:none}.sec.show{display:block;animation:slideUp .35s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#fff;border-radius:18px;padding:20px;margin-bottom:14px;border:1.5px solid var(--bdr);box-shadow:var(--sh)}
+.chdr{display:flex;align-items:center;gap:11px;padding-bottom:13px;border-bottom:1.5px solid #F5EDE4;margin-bottom:16px}
+.cico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.ctit{font-size:.98rem;font-weight:800;color:var(--dk)}.csub{font-size:.72rem;color:var(--gy);margin-top:2px;line-height:1.4}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:50px;padding:4px 12px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.b-or{background:var(--orb);color:var(--or)}.b-tl{background:var(--tlb);color:var(--tl)}.b-pu{background:var(--pub);color:var(--pu)}.b-gn{background:var(--gnb);color:var(--gn)}.b-go{background:var(--gob);color:var(--go)}
+.info-box{background:var(--orl);border:1.5px solid #FED7AA;border-radius:12px;padding:12px 14px;margin-bottom:13px;font-size:.81rem;color:var(--dk);line-height:1.6}
+.info-box strong{color:var(--or)}
+.gram-box{background:linear-gradient(135deg,var(--or),#9A3412);color:#fff;border-radius:14px;padding:16px;margin-bottom:14px}
+.gram-box h3{color:#FED7AA;margin-bottom:8px;font-size:.9rem}
+.gram-box p{font-size:.84rem;line-height:1.65}
+.gram-rule{background:rgba(255,255,255,.12);border-radius:9px;padding:8px 12px;margin-top:8px;font-size:.8rem;line-height:1.55}
+/* STORY */
+.story-box{background:var(--orl);border:2px solid #FED7AA;border-radius:16px;padding:18px;margin-bottom:14px}
+.story-lbl{font-size:.66rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.story-img{font-size:3.2rem;text-align:center;margin-bottom:12px;line-height:1}
+.story-text{font-size:.92rem;color:var(--dk);line-height:2.1;font-weight:600}
+.story-text .hl{background:#FED7AA;border-radius:4px;padding:1px 4px;font-weight:800;color:#9A3412}
+.story-en{font-size:.8rem;color:#777;border-top:1px dashed #F5C6A0;padding-top:9px;margin-top:9px;line-height:1.7;display:none}
+.story-en.show{display:block}
+/* DAYS CARDS */
+.days-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+@media(min-width:480px){.days-grid{grid-template-columns:repeat(4,1fr)}}
+.day-card{background:#fff;border-radius:13px;padding:13px 9px;text-align:center;border:1.5px solid var(--bdr);cursor:pointer;transition:all .25s;position:relative}
+.day-card:hover{border-color:var(--or);transform:translateY(-2px);box-shadow:var(--sh)}
+.day-card.sel{border-color:var(--or);background:var(--orl)}
+.dc-ico{font-size:1.6rem;margin-bottom:5px}
+.dc-fr{font-size:.88rem;font-weight:800;color:var(--dk);margin-bottom:2px}
+.dc-en{font-size:.7rem;color:var(--gy);filter:blur(4px);transition:filter .3s;cursor:pointer}
+.dc-en.reveal{filter:none;color:var(--or)}
+.dc-num{font-size:.62rem;font-weight:700;background:var(--orb);color:var(--or);border-radius:50px;padding:2px 7px;display:inline-block;margin-top:3px}
+/* NUMBERS */
+.num-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:480px){.num-grid{grid-template-columns:repeat(5,1fr)}}
+.num-card{background:#fff;border:1.5px solid var(--bdr);border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.num-card:hover{border-color:var(--or);background:var(--orl)}
+.nc-num{font-size:1.3rem;font-weight:900;color:var(--or)}
+.nc-fr{font-size:.8rem;font-weight:800;color:var(--dk)}
+.nc-ph{font-size:.65rem;color:var(--gy);font-style:italic}
+/* DATE BUILDER */
+.date-formula{background:linear-gradient(135deg,#FFF7ED,#FFFBEB);border:2px solid #FED7AA;border-radius:14px;padding:16px;margin-bottom:14px}
+.formula-row{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.f-part{background:#fff;border-radius:9px;padding:7px 12px;font-size:.8rem;font-weight:700;border:1.5px solid var(--bdr);text-align:center}
+.f-plus{color:var(--or);font-weight:900;font-size:1.1rem}
+.f-arrow{color:var(--or2);font-size:1.2rem}
+/* HOLIDAYS */
+.holiday-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;border:1.5px solid var(--bdr);display:flex;gap:12px;align-items:flex-start}
+.h-ico{font-size:2rem;flex-shrink:0;width:44px;text-align:center}
+.h-date{font-size:.68rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.h-name{font-size:.9rem;font-weight:800;color:var(--dk);margin-bottom:2px}
+.h-desc{font-size:.76rem;color:var(--gy);line-height:1.45}
+/* PASSAGE */
+.passage{background:#fff;border-left:4px solid var(--or2);border-radius:0 14px 14px 0;padding:16px;margin-bottom:14px;font-size:.87rem;color:var(--md);line-height:2.1;border-top:1px solid var(--bdr);border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+/* COPY ACTIVITY */
+.copy-box{background:linear-gradient(135deg,var(--orl),#FFFBEB);border:2px solid #FED7AA;border-radius:14px;padding:15px;margin-bottom:12px}
+.copy-src{font-size:.9rem;font-weight:700;color:var(--dk);line-height:1.8;padding:11px 13px;background:#fff;border-radius:10px;margin-bottom:10px;border:1.5px solid var(--bdr)}
+.copy-inp{width:100%;border:2px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;resize:none;transition:border-color .2s;line-height:1.65;color:var(--dk);min-height:70px}
+.copy-inp:focus{border-color:var(--or)}
+.copy-inp.ok{border-color:var(--gn);background:var(--gnb)}.copy-inp.bad{border-color:var(--rd);background:var(--rdb)}
+/* FILL */
+.fill-wrap{background:var(--orl);border-radius:12px;padding:13px;margin-bottom:10px;border:2px solid transparent;transition:border-color .3s}
+.fill-wrap.ok{border-color:var(--gn)}.fill-wrap.bad{border-color:var(--rd)}
+.fill-q{font-size:.9rem;color:var(--dk);font-weight:600;line-height:1.8;margin-bottom:8px}
+.fill-inp{border:2px solid var(--bdr);border-radius:8px;padding:6px 11px;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;min-width:90px;max-width:200px;min-height:40px;vertical-align:middle;transition:border-color .2s;display:inline-block}
+.fill-inp:focus{border-color:var(--or)}
+.fill-inp.ok{border-color:var(--gn);background:var(--gnb)}.fill-inp.bad{border-color:var(--rd);background:var(--rdb)}
+.fill-btn{min-height:38px;padding:0 14px;font-size:.76rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;background:var(--or);color:#fff;margin-top:7px;font-family:'Inter',sans-serif}
+.fill-fb{font-size:.78rem;margin-top:6px;font-weight:700;display:none;line-height:1.5}
+/* TROUS */
+.trous-s{background:var(--orl);border-radius:12px;padding:13px;margin-bottom:10px;border:2px solid transparent;transition:border-color .3s;font-size:.9rem;color:var(--dk);font-weight:600;line-height:2.3}
+.trous-s.ok{border-color:var(--gn)}.trous-s.bad{border-color:var(--rd)}
+.trous-inp{border:2px solid #FED7AA;border-radius:8px;padding:5px 9px;font-size:.88rem;font-family:'Inter',sans-serif;outline:none;display:inline-block;min-width:90px;min-height:38px;vertical-align:middle;transition:border-color .2s}
+.trous-inp:focus{border-color:var(--or)}
+.trous-inp.ok{border-color:var(--gn);background:var(--gnb)}.trous-inp.bad{border-color:var(--rd);background:var(--rdb)}
+/* MCQ */
+.mcq-wrap{background:#fff;border:1.5px solid var(--bdr);border-radius:14px;padding:15px;margin-bottom:12px}
+.mcq-q{font-size:.9rem;font-weight:700;color:var(--dk);margin-bottom:11px;line-height:1.4}
+.mcq-opt{border:1.5px solid var(--bdr);border-radius:10px;padding:10px 13px;margin-bottom:7px;cursor:pointer;font-size:.85rem;transition:all .2s;min-height:46px;display:flex;align-items:center;gap:9px;font-weight:500}
+.mcq-opt:hover{border-color:var(--or);background:var(--orl)}
+.mcq-opt.co{border-color:var(--gn)!important;background:var(--gnb)!important;color:var(--gn);font-weight:700}
+.mcq-opt.wo{border-color:var(--rd)!important;background:var(--rdb)!important;color:var(--rd);font-weight:700}
+.mcq-opt.dis{pointer-events:none}
+.mcq-fb{font-size:.78rem;margin-top:7px;padding:9px 12px;border-radius:9px;display:none;font-weight:600;line-height:1.5}
+.mcq-fb.show{display:block}
+/* WRITE */
+.write-prompt{background:var(--gob);border:1.5px solid #FCD34D;border-radius:13px;padding:13px;margin-bottom:11px}
+.wp-lbl{font-size:.63rem;font-weight:800;color:var(--go);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.wp-q{font-size:.86rem;font-weight:700;color:var(--dk);line-height:1.5;margin-bottom:4px}
+.wp-hint{font-size:.73rem;color:#92400E;line-height:1.5}
+.write-inp{width:100%;border:2px solid var(--bdr);border-radius:11px;padding:11px 12px;font-size:.88rem;font-family:'Inter',sans-serif;outline:none;resize:vertical;min-height:100px;transition:border-color .2s;line-height:1.7;color:var(--dk)}
+.write-inp:focus{border-color:var(--or)}
+.write-fb{margin-top:8px;padding:10px 13px;border-radius:10px;font-size:.79rem;font-weight:600;display:none;line-height:1.5}
+.write-fb.show{display:block}
+/* MIRROR */
+.mirror-card{background:#fff;border:1.5px solid var(--bdr);border-radius:14px;padding:15px;margin-bottom:11px;transition:all .2s}
+.mirror-card:hover{border-color:var(--or)}
+.mir-num{font-size:.62rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.mir-fr{font-size:.95rem;font-weight:700;color:var(--dk);margin-bottom:2px;line-height:1.5}
+.mir-en{font-size:.73rem;color:var(--gy);margin-bottom:8px;filter:blur(4px);transition:filter .3s;cursor:pointer}
+.mir-en.show{filter:none}
+.mir-note{font-size:.71rem;background:var(--orl);color:var(--or);border-radius:7px;padding:5px 9px;margin-bottom:8px;font-weight:600;line-height:1.4}
+/* DICTATION */
+.dict-target{background:linear-gradient(135deg,var(--orl),#FFFBEB);border-radius:12px;padding:12px 15px;text-align:center;font-size:1.05rem;font-weight:700;color:var(--dk);margin-bottom:10px;border:1.5px solid #FED7AA;letter-spacing:.3px;display:none}
+.dict-inp{width:100%;border:2px solid var(--bdr);border-radius:10px;padding:9px 12px;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;min-height:44px;transition:border-color .2s}
+.dict-inp:focus{border-color:var(--or)}
+.dict-inp.ok{border-color:var(--gn);background:var(--gnb)}.dict-inp.bad{border-color:var(--rd);background:var(--rdb)}
+/* UBAR */
+.ubar{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.ubtn{border:2px solid #FED7AA;border-radius:50px;padding:8px 12px;font-size:.79rem;font-weight:700;cursor:pointer;background:#fff;color:var(--or);min-height:44px;transition:all .2s;flex:1;text-align:center;font-family:'Inter',sans-serif}
+.ubtn.sel{background:var(--or);color:#fff}
+/* BUTTONS */
+.btn-or{background:var(--or);color:#fff;border:none;border-radius:50px;min-height:46px;padding:0 22px;font-size:.84rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-or:hover{background:#9A3412}
+.btn-out{background:#fff;color:var(--or);border:2px solid var(--or);border-radius:50px;min-height:44px;padding:0 20px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-out:hover{background:var(--orl)}
+.btn-gn{background:var(--gn);color:#fff;border:none;border-radius:50px;min-height:44px;padding:0 20px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.btn-rec{background:var(--rd);color:#fff;border:none;border-radius:50px;min-height:44px;padding:0 18px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-rec.on{animation:rp 1.2s infinite}
+@keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
+.btn-pb{background:var(--gn);color:#fff;border:none;border-radius:50px;min-height:44px;padding:0 18px;font-size:.82rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.btn-pb.show{display:inline-flex}
+.redo-btn{background:#F5EDE4;color:var(--md);border:none;border-radius:50px;padding:7px 15px;font-size:.74rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;transition:all .2s}
+.redo-btn:hover{background:var(--bdr)}
+.aud-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;align-items:center}
+.nav-bar{display:flex;justify-content:space-between;margin-top:20px;gap:10px}
+.btn-nxt{background:linear-gradient(135deg,var(--or),#9A3412);color:#fff;border:none;border-radius:50px;min-height:50px;padding:0 28px;font-size:.9rem;font-weight:800;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;box-shadow:0 4px 14px rgba(194,65,12,.3)}
+.btn-nxt:hover{transform:translateY(-1px)}
+.btn-prv{background:#fff;color:var(--dk);border:1.5px solid var(--bdr);border-radius:50px;min-height:48px;padding:0 22px;font-size:.86rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-prv:hover{border-color:var(--or);color:var(--or)}
+.ss-box{background:linear-gradient(135deg,var(--orl),var(--pub));border:1.5px solid #FED7AA;border-radius:14px;padding:15px;text-align:center;margin-top:14px}
+.sk-bar{height:6px;background:var(--bdr);border-radius:10px;overflow:hidden;margin-top:4px}
+.sk-fill{height:6px;border-radius:10px;transition:width 1s ease .3s}
+.coach-wrap{position:fixed;bottom:15px;right:13px;z-index:300;display:flex;flex-direction:column;align-items:flex-end}
+.coach-av{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--or),#9A3412);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;animation:float 3s ease-in-out infinite;box-shadow:0 4px 14px rgba(194,65,12,.3)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.coach-msg{background:#fff;border-radius:14px;border:1.5px solid #FED7AA;padding:10px 13px;max-width:210px;margin-bottom:8px;box-shadow:0 4px 18px rgba(0,0,0,.1);font-size:.77rem;color:var(--dk);line-height:1.5;display:none}
+.coach-msg.show{display:block;animation:fu .3s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* IMAGES */
+.img-scene{width:100%;border-radius:14px;aspect-ratio:16/7;object-fit:cover;display:block;margin-bottom:14px;border:1.5px solid var(--bdr)}
+.img-mock{border-radius:14px;aspect-ratio:16/7;display:flex;align-items:center;justify-content:center;margin-bottom:14px;border:1.5px solid var(--bdr);font-size:3rem;background:linear-gradient(135deg,#FFF7ED,#FFFBEB)}
+/* CONFETTI */
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;display:none}
+.cf{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall 2s ease forwards}
+@keyframes fall{0%{opacity:1;transform:translateY(-10px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<div id="confettiBox" class="confetti-container"></div>
+
+<div class="hdr">
+  <div class="logo">FAST <em>FRENCH</em> LAB</div>
+  <div class="prog-wrap"><div class="prog-lbl">Day 8</div><div class="prog-rail"><div class="prog-bar" id="progBar"></div></div></div>
+  <div class="day-pill">📅 DAY 8</div>
+</div>
+
+<div class="wrap">
+  <div class="dots" id="dotsWrap"></div>
+
+  <!-- ====== SEC 1: LISTENING + COPYING ====== -->
+  <div class="sec show" id="sec1">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--orl)">🎧</div><div><div class="ctit">Listening First — La Semaine de Marie</div><div class="csub">Activity 1 of 7 · Listen before you read · Then copy · Then fill in the blanks</div></div></div>
+      <div class="badge b-or">🎧 Listening First · Copying Activity</div>
+
+      <div class="info-box">🎯 <strong>Today's Objective:</strong> By the end of Day 8, you will be able to say and write <strong>dates, birthdays, days of the week, and numbers up to 70</strong> — in French, with confidence.</div>
+
+      <div class="img-mock" style="font-size:2.5rem;flex-direction:column;gap:6px">
+        <div>📅🗓️🎂</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--or)">Marie's Weekly Calendar</div>
+      </div>
+
+      <!-- STEP 1: LISTEN -->
+      <div class="story-box" id="step1box">
+        <div class="story-lbl">🎧 Step 1 — Listen Only. Close your eyes. Just absorb the sounds.</div>
+        <div style="background:var(--or);border-radius:14px;padding:14px;margin-bottom:12px">
+          <div style="font-size:.7rem;color:rgba(255,255,255,.55);margin-bottom:8px;text-align:center">La Semaine de Marie — A1 French Story</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button id="playBtn" onclick="togglePlay()" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s">▶</button>
+            <div style="flex:1"><div style="height:5px;background:rgba(255,255,255,.2);border-radius:10px"><div id="audioFill" style="height:5px;background:#fff;border-radius:10px;width:0%;transition:width .3s"></div></div><div style="font-size:.62rem;color:rgba(255,255,255,.5);margin-top:3px">~0:45</div></div>
+          </div>
+        </div>
+        <div class="aud-row" style="justify-content:center">
+          <button class="btn-or" onclick="spkText(STORY_FR,this)">🔊 Normal Speed</button>
+          <button class="btn-out" onclick="spkText(STORY_FR,this,0.52)">🐢 Slow Speed</button>
+        </div>
+        <button class="btn-or" style="width:100%;justify-content:center;margin-top:12px" onclick="showStep2()">👁️ I've listened — Show the Text →</button>
+      </div>
+
+      <!-- STEP 2: READ + FOLLOW -->
+      <div id="step2box" style="display:none">
+        <div class="story-box">
+          <div class="story-lbl">👁️ Step 2 — Listen Again. Follow the text.</div>
+          <div class="story-img">📅🏠👩</div>
+          <div class="story-text" id="storyDisplay"></div>
+          <div class="story-en" id="storyEn">
+            Hello! My name is Marie. I live in Paris. This week is special for me. Monday — I work at the hospital. Tuesday — I go to the supermarket. Wednesday — it is my birthday! I am 32 years old. The date is: Wednesday, the 14th of February. My husband offers me flowers. Thursday — we visit my parents. Friday — I go to the cinema with my friend. Saturday and Sunday — we rest at home. My favourite day is Wednesday — because it is my birthday!
+          </div>
+          <div class="aud-row" style="margin-top:12px;flex-wrap:wrap;gap:8px">
+            <button class="btn-or" onclick="syncListen(0.82,this)">🔊 Listen + Follow Text</button>
+            <button class="btn-out" onclick="syncListen(0.52,this)">🐢 Slow + Follow</button>
+            <button class="btn-or" style="background:var(--pu)" onclick="toggleEn()">👁️ Show/Hide English</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: COPY ACTIVITY -->
+        <div class="story-box">
+          <div class="story-lbl">✏️ Step 3 — Copying Activity. Copy each sentence exactly. Then hear it.</div>
+          <div class="info-box" style="margin-bottom:12px">📝 <strong>Why copy?</strong> Copying trains your brain AND your hands to write French correctly. Every accent, every capital letter matters. This is exactly what TCF/TEF Canada writing expects!</div>
+          <div id="copyActivities"></div>
+        </div>
+
+        <!-- STEP 4: FILL VERBS -->
+        <div class="story-box">
+          <div class="story-lbl">✏️ Step 4 — Fill in the Missing Words. Look at the story above!</div>
+          <div id="storyFills"></div>
+          <div class="aud-row">
+            <button class="btn-gn" onclick="checkStoryFills()">✅ Check Answers</button>
+            <button class="redo-btn" onclick="resetStoryFills()">🔄 Redo</button>
+          </div>
+          <div id="storyFillFb" style="display:none;margin-top:10px;padding:10px 13px;border-radius:10px;font-size:.8rem;font-weight:700"></div>
+        </div>
+
+        <!-- UNDERSTAND BAR -->
+        <div class="story-box">
+          <div class="story-lbl">💭 How much of Marie's story did you understand?</div>
+          <div class="ubar" id="ubar1"></div>
+          <div id="ubar1fb" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;font-size:.8rem;font-weight:700"></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-bar"><div></div><button class="btn-nxt" onclick="goSec(2)">Days of the Week →</button></div>
+  </div>
+
+  <!-- ====== SEC 2: DAYS OF WEEK ====== -->
+  <div class="sec" id="sec2">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--orl)">📅</div><div><div class="ctit">Les Jours de la Semaine</div><div class="csub">Activity 2 of 7 · Days of the week · How to use them · Important rules</div></div></div>
+      <div class="badge b-or">📅 Days of the Week</div>
+
+      <div class="gram-box">
+        <h3>Important Rules for Days in French</h3>
+        <p><strong style="color:#FED7AA">Rule 1:</strong> Days of the week are NOT capitalised in French (unlike English!).<br><strong style="color:#FED7AA">Rule 2:</strong> No article needed for "on Monday" — just say <em>lundi</em>, not "le lundi"... <em>unless</em> it's habitual (every Monday)!<br><strong style="color:#FED7AA">Rule 3:</strong> For habitual actions → <em>le lundi</em> (every Monday), <em>le dimanche</em> (every Sunday).</p>
+        <div class="gram-rule">
+          je travaille lundi = I work on Monday (this specific Monday)<br>
+          je travaille <strong>le</strong> lundi = I work on Mondays (every week)
+        </div>
+      </div>
+
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin-bottom:10px">📅 Tap each day to hear it — tap 🇬🇧 to reveal English:</div>
+      <div class="days-grid" id="daysGrid"></div>
+
+      <!-- DAY FILL PRACTICE -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin:14px 0 10px">✏️ Practice — Fill in the missing day:</div>
+      <div id="dayFills"></div>
+      <div class="aud-row">
+        <button class="btn-gn" onclick="checkDayFills()">✅ Check</button>
+        <button class="redo-btn" onclick="resetDayFills()">🔄 Redo</button>
+      </div>
+      <div id="dayFillFb" style="display:none;margin-top:8px;padding:10px 13px;border-radius:10px;font-size:.8rem;font-weight:700"></div>
+
+      <!-- DAY MCQ -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin:16px 0 10px">🎯 Quick Quiz — Which Day?</div>
+      <div id="dayMCQ"></div>
+    </div>
+    <div class="nav-bar"><button class="btn-prv" onclick="goSec(1)">← Back</button><button class="btn-nxt" onclick="goSec(3)">Numbers 40–70 →</button></div>
+  </div>
+
+  <!-- ====== SEC 3: NUMBERS 40-70 ====== -->
+  <div class="sec" id="sec3">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--orl)">🔢</div><div><div class="ctit">Numbers 40–70 — In Context</div><div class="csub">Activity 3 of 7 · Tap to hear · Numbers in dates, ages, years</div></div></div>
+      <div class="badge b-or">🔢 Numbers Recap + New</div>
+
+      <div class="gram-box">
+        <h3>The Pattern Rule</h3>
+        <p>Numbers 40–69 all follow the same logic as 20–39: <strong>tens + hyphen + units</strong>.</p>
+        <div class="gram-rule">quarante = 40 · cinquante = 50 · soixante = 60<br>41 = quarante et un · 42 = quarante-deux<br>51 = cinquante et un · 62 = soixante-deux<br>⚠️ TRAP: 70 = soixante-dix (sixty-ten!) — French counts differently from 70!</div>
+      </div>
+
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin-bottom:10px">🔢 Tap any number to hear it:</div>
+      <div class="num-grid" id="numGrid40"></div>
+
+      <div class="img-mock" style="font-size:2.5rem;flex-direction:column;gap:6px">
+        <div>🎂🕯️🎉</div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--or)">Numbers in birthday and date contexts</div>
+      </div>
+
+      <!-- NUMBERS IN CONTEXT -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin-bottom:10px">📍 Numbers in Real Contexts — Tap to hear:</div>
+      <div id="numContexts"></div>
+
+      <!-- DICTATION ACTIVITY -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin:14px 0 10px">🎧 Number Dictation — Listen and write the number in French:</div>
+      <div class="info-box" style="margin-bottom:12px">🎧 Press PLAY. Listen to the number in French. Write what you hear in the box. Press Check. Do not look at the number grid above — test your memory!</div>
+      <div id="numDictation"></div>
+    </div>
+    <div class="nav-bar"><button class="btn-prv" onclick="goSec(2)">← Back</button><button class="btn-nxt" onclick="goSec(4)">Dates & Birthdays →</button></div>
+  </div>
+
+  <!-- ====== SEC 4: DATES ====== -->
+  <div class="sec" id="sec4">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--orl)">🎂</div><div><div class="ctit">Dates & Birthdays</div><div class="csub">Activity 4 of 7 · How to say a date · Months · Birthdays · Public holidays</div></div></div>
+      <div class="badge b-go">🎂 Dates · Months · Fêtes</div>
+
+      <!-- DATE FORMULA -->
+      <div class="date-formula">
+        <div style="font-size:.8rem;font-weight:800;color:var(--or);margin-bottom:10px">📐 The French Date Formula:</div>
+        <div class="formula-row">
+          <div class="f-part">le</div><div class="f-plus">+</div>
+          <div class="f-part" style="background:var(--orl)">NUMÉRO<br><span style="font-size:.65rem;color:var(--gy)">number</span></div><div class="f-plus">+</div>
+          <div class="f-part" style="background:var(--pub)">MOIS<br><span style="font-size:.65rem;color:var(--gy)">month</span></div>
+        </div>
+        <div style="text-align:center;font-size:.9rem;font-weight:700;color:var(--dk);margin-top:6px">→ <span style="color:var(--or)">le 14 février</span> = the 14th of February</div>
+        <div style="background:rgba(255,255,255,.7);border-radius:9px;padding:8px 12px;margin-top:10px;font-size:.78rem;color:var(--md);line-height:1.55">
+          ⭐ <strong>Exception for the 1st:</strong> Use "premier" not "un" — le <strong>premier</strong> janvier (not le un janvier)<br>
+          ⭐ <strong>Year:</strong> en + year — en 2024, né(e) en 1998, en mille neuf cent quatre-vingt-dix-huit
+        </div>
+      </div>
+
+      <!-- MONTHS -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin-bottom:10px">🗓️ Les Mois de l'Année — Tap to hear:</div>
+      <div id="monthsGrid"></div>
+
+      <!-- ASKING BIRTHDAYS -->
+      <div class="gram-box" style="margin-top:4px">
+        <h3>🎂 Asking & Saying Birthdays</h3>
+        <p>Q: <strong>C'est quand ton anniversaire?</strong> — When is your birthday? (informal)<br>Q: <strong>Quelle est la date de votre anniversaire?</strong> — What is your birthday? (formal)<br>A: <strong>Mon anniversaire est le 14 mars.</strong> — My birthday is March 14th.<br>A: <strong>Je suis né(e) le 3 juin 1995.</strong> — I was born on June 3rd, 1995.</p>
+        <div class="gram-rule">🎉 Joyeux anniversaire! = Happy birthday! · Bonne fête! = Happy name day!</div>
+      </div>
+
+      <!-- DATE FILLS -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin:14px 0 10px">✏️ Write These Dates in French:</div>
+      <div id="dateFills"></div>
+      <div class="aud-row">
+        <button class="btn-gn" onclick="checkDateFills()">✅ Check</button>
+        <button class="redo-btn" onclick="resetDateFills()">🔄 Redo</button>
+      </div>
+      <div id="dateFillFb" style="display:none;margin-top:8px;padding:10px 13px;border-radius:10px;font-size:.8rem;font-weight:700"></div>
+
+      <!-- HOLIDAYS SECTION -->
+      <div style="font-size:.88rem;font-weight:800;color:var(--dk);margin:18px 0 12px;padding-top:14px;border-top:1.5px solid var(--bdr)">🇫🇷 Les Jours Fériés en France — Public Holidays:</div>
+      <div class="info-box">📅 <strong>France has 11 public holidays</strong> (jours fériés) per year. Here are the most important ones. You will see these dates in the TCF/TEF Canada reading section — French culture is part of the exam!</div>
+      <div id="holidaysGrid"></div>
+    </div>
+    <div class="nav-bar"><button class="btn-prv" onclick="goSec(3)">← Back</button><button class="btn-nxt" onclick="goSec(5)">Comprehension →</button></div>
+  </div>
+
+  <!-- ====== SEC 5: COMPREHENSION ====== -->
+  <div class="sec" id="sec5">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--orl)">📖</div><div><div class="ctit">Comprehension — L'Agenda de la Famille</div><div class="csub">Activity 5 of 7 · Read · Listen · Answer questions · Texte à trous</div></div></div>
+      <div class="badge b-tl">📖 Comprehension Passage</div>
+
+      <div class="img-mock" style="font-size:2.5rem;flex-direction:column;gap:6px">
+        <div>👨‍👩‍👧‍👦📅🗓️</div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--or)">The Diallo Family's Year Calendar</div>
+      </div>
+
+      <div class="passage" id="compPassage">
+        La famille <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">Diallo</span> habite à Paris. Ils ont beaucoup d'événements importants cette année.<br><br>
+        Le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">lundi 3 janvier</span>, c'est la rentrée scolaire. Les enfants retournent à l'école.<br>
+        Le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">mardi 14 février</span>, c'est la Saint-Valentin. Le père offre des fleurs à la mère.<br>
+        Le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">vendredi 1er mai</span>, c'est la Fête du Travail. Toute la famille reste à la maison.<br>
+        Le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">samedi 14 juillet</span>, c'est la Fête Nationale. Ils regardent le feu d'artifice.<br>
+        Le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">jeudi 25 décembre</span>, c'est Noël. La famille mange ensemble et échange des cadeaux.<br><br>
+        L'anniversaire de la mère est le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">dimanche 8 mars</span>. Elle a <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">quarante-cinq</span> ans. L'anniversaire du père est le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">mercredi 22 juin</span>. Il a <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">cinquante</span> ans. La petite fille s'appelle Aminata. Son anniversaire est le <span style="background:var(--orb);border-radius:3px;padding:1px 4px;font-weight:800;color:#9A3412">samedi 5 août</span>. Elle a huit ans — et elle adore le gâteau au chocolat!
+      </div>
+
+      <div class="aud-row" style="margin-bottom:14px">
+        <button class="btn-or" onclick="spkText(COMP_TEXT,this)">🔊 Listen</button>
+        <button class="btn-out" onclick="spkText(COMP_TEXT,this,0.55)">🐢 Slow</button>
+      </div>
+
+      <!-- COMPREHENSION MCQs -->
+      <div style="font-size:.82rem;font-weight:800;color:var(--dk);margin-bottom:10px">❓ Comprehension Questions:</div>
+      <div id="compMCQ"></div>
+
+      <!-- TEXTE À TROUS -->
+      <div style="font-size:.88rem;font-weight:800;color:var(--dk);margin:16px 0 10px;padding-top:14px;border-top:1.5px solid var(--bdr)">🎧 Texte à Trous — Listen and fill the gaps:</div>
+      <div class="info-box" style="margin-bottom:12px">🎧 <strong>Listen to the passage again</strong>, then fill in the missing dates and numbers. Press Listen above if you need to hear it again — 3 listens is normal and healthy at A1!</div>
+      <div id="trousEx"></div>
+      <div class="aud-row">
+        <button class="btn-gn" onclick="checkTrous()">✅ Check Gaps</button>
+        <button class="redo-btn" onclick="resetTrous()">🔄 Redo</button>
+      </div>
+      <div id="trousFb" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:.82rem;font-weight:700"></div>
+
+      <!-- UNDERSTAND BAR 2 -->
+      <div class="story-box" style="margin-top:14px">
+        <div class="story-lbl">💭 How much of the Diallo family passage did you understand?</div>
+        <div class="ubar" id="ubar2"></div>
+        <div id="ubar2fb" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;font-size:.8rem;font-weight:700"></div>
+      </div>
+    </div>
+    <div class="nav-bar"><button class="btn-prv" onclick="goSec(4)">← Back</button><button class="btn-nxt" onclick="goSec(6)">Writing →</button></div>
+  </div>
+
+  <!-- ====== SEC 6: WRITING ====== -->
+  <div class="sec" id="sec6">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--gnb)">✍️</div><div><div class="ctit">Writing — Dates, Birthdays & Holidays</div><div class="csub">Activity 6 of 7 · Write · Get feedback · Screenshot · Share in community</div></div></div>
+      <div class="badge b-gn">✍️ Production Écrite · TCF/TEF Ready</div>
+
+      <div class="gram-box" style="margin-bottom:14px">
+        <h3>Sentence Patterns for This Writing Task</h3>
+        <p>Use these patterns as building blocks for your writing today:</p>
+        <div class="gram-rule">
+          Mon anniversaire est le [date].<br>
+          Je suis né(e) le [date] à [city].<br>
+          La [holiday] est le [date]. C'est un jour férié.<br>
+          Le [day], je [verb + activity].<br>
+          Ma famille célèbre [holiday] le [date].<br>
+          J'aime le [day] parce que [reason].
+        </div>
+      </div>
+
+      <div id="writingTasks"></div>
+
+      <div class="ss-box">
+        <div style="font-size:.8rem;font-weight:800;color:var(--dk);margin-bottom:6px">📸 Screenshot & Share</div>
+        <div style="font-size:.74rem;color:var(--gy);margin-bottom:10px;line-height:1.5">Take a screenshot of your writing and post it in the Fast French Lab community. Coach Linda reads and corrects every submission!</div>
+        <button class="btn-or" onclick="copyWriting()">📋 Copy My Writing</button>
+        <div id="copyFb" style="display:none;margin-top:8px;font-size:.76rem;color:var(--gn);font-weight:700">✅ Copied! Go post it in the community with: "Day 8 Writing — please correct 🙏"</div>
+      </div>
+    </div>
+    <div class="nav-bar"><button class="btn-prv" onclick="goSec(5)">← Back</button><button class="btn-nxt" onclick="goSec(7)">Mirror Speaking →</button></div>
+  </div>
+
+  <!-- ====== SEC 7: MIRROR SPEAKING ====== -->
+  <div class="sec" id="sec7">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--orl)">🪞</div><div><div class="ctit">Mirror Speaking — 15 Sentences</div><div class="csub">Activity 7 of 7 · Listen · Repeat · Record · Hear Yourself · All about dates & days</div></div></div>
+      <div class="badge b-or">🪞 15 Mirror Practices</div>
+      <div class="info-box">🎯 <strong>How it works:</strong> Press 🔊 Hear. Then say it OUT LOUD. Then press 🎤 Record. Then ▶️ Hear Yourself. Compare — try to match the rhythm and intonation!</div>
+      <div id="mirrorCards"></div>
+    </div>
+
+    <!-- DAY 8 SCORE -->
+    <div id="dayScoreCard" style="background:#fff;border:1.5px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--sh)"></div>
+    <div class="nav-bar"><button class="btn-prv" onclick="goSec(6)">← Back</button><button class="btn-nxt" style="background:linear-gradient(135deg,var(--gn),#047857)" onclick="showComplete()">🎉 Complete Day 8</button></div>
+  </div>
+</div>
+
+<!-- COACH -->
+<div class="coach-wrap">
+  <div class="coach-msg" id="coachMsg"></div>
+  <div class="coach-av" onclick="toggleCoach()">👩🏾‍🏫</div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const STORY_FR="Bonjour! Je m'appelle Marie. J'habite à Paris. Cette semaine est spéciale pour moi. Lundi, je travaille à l'hôpital. Mardi, je vais au supermarché. Mercredi, c'est mon anniversaire! J'ai trente-deux ans. La date est: mercredi le quatorze février. Mon mari m'offre des fleurs. Jeudi, nous visitons mes parents. Vendredi, je vais au cinéma avec mon amie. Samedi et dimanche, nous nous reposons à la maison. Mon jour préféré, c'est le mercredi — parce que c'est mon anniversaire!";
+const STORY_WORDS=STORY_FR.split(' ');
+
+const COMP_TEXT="La famille Diallo habite à Paris. Le lundi trois janvier, c'est la rentrée scolaire. Les enfants retournent à l'école. Le mardi quatorze février, c'est la Saint-Valentin. Le père offre des fleurs à la mère. Le vendredi premier mai, c'est la Fête du Travail. Le samedi quatorze juillet, c'est la Fête Nationale. Ils regardent le feu d'artifice. Le jeudi vingt-cinq décembre, c'est Noël. L'anniversaire de la mère est le dimanche huit mars. Elle a quarante-cinq ans. L'anniversaire du père est le mercredi vingt-deux juin. Il a cinquante ans.";
+
+const DAYS=[
+  {fr:"lundi",en:"Monday",ico:"💼",num:"1st — Monday"},
+  {fr:"mardi",en:"Tuesday",ico:"🎓",num:"2nd — Tuesday"},
+  {fr:"mercredi",en:"Wednesday",ico:"🌿",num:"3rd — Wednesday"},
+  {fr:"jeudi",en:"Thursday",ico:"🌤️",num:"4th — Thursday"},
+  {fr:"vendredi",en:"Friday",ico:"🎉",num:"5th — Friday"},
+  {fr:"samedi",en:"Saturday",ico:"😎",num:"6th — Saturday"},
+  {fr:"dimanche",en:"Sunday",ico:"🛌",num:"7th — Sunday"}
+];
+
+const MONTHS=[
+  {fr:"janvier",en:"January",num:"01"},{fr:"février",en:"February",num:"02"},
+  {fr:"mars",en:"March",num:"03"},{fr:"avril",en:"April",num:"04"},
+  {fr:"mai",en:"May",num:"05"},{fr:"juin",en:"June",num:"06"},
+  {fr:"juillet",en:"July",num:"07"},{fr:"août",en:"August",num:"08"},
+  {fr:"septembre",en:"September",num:"09"},{fr:"octobre",en:"October",num:"10"},
+  {fr:"novembre",en:"November",num:"11"},{fr:"décembre",en:"December",num:"12"}
+];
+
+const NUMS=[
+  {n:40,fr:"quarante",ph:"kaʁɑ̃t"},{n:41,fr:"quarante et un",ph:"kaʁɑ̃te œ̃"},
+  {n:42,fr:"quarante-deux",ph:"kaʁɑ̃t dø"},{n:45,fr:"quarante-cinq",ph:"kaʁɑ̃t sɛ̃k"},
+  {n:50,fr:"cinquante",ph:"sɛ̃kɑ̃t"},{n:51,fr:"cinquante et un",ph:"sɛ̃kɑ̃t e œ̃"},
+  {n:55,fr:"cinquante-cinq",ph:"sɛ̃kɑ̃t sɛ̃k"},{n:60,fr:"soixante",ph:"swasɑ̃t"},
+  {n:61,fr:"soixante et un",ph:"swasɑ̃t e œ̃"},{n:65,fr:"soixante-cinq",ph:"swasɑ̃t sɛ̃k"},
+  {n:70,fr:"soixante-dix",ph:"swasɑ̃t dis"}
+];
+
+const STORY_COPIES=[
+  {text:"Lundi, je travaille à l'hôpital.",en:"Monday, I work at the hospital."},
+  {text:"Mercredi, c'est mon anniversaire!",en:"Wednesday, it's my birthday!"},
+  {text:"La date est: le quatorze février.",en:"The date is: the 14th of February."},
+  {text:"Mon jour préféré, c'est le vendredi.",en:"My favourite day is Friday."}
+];
+
+const STORY_FILLS=[
+  {before:"Lundi, je ",blank:"travaille",after:" à l'hôpital.",hint:"to work (je form)"},
+  {before:"Mercredi, c'est mon ",blank:"anniversaire",after:"!",hint:"birthday"},
+  {before:"J'ai trente-",blank:"deux",after:" ans.",hint:"number after 30 = 32"},
+  {before:"Mon mari m'offre des ",blank:"fleurs",after:".",hint:"flowers"},
+  {before:"Mon jour préféré, c'est le ",blank:"mercredi",after:".",hint:"the day of her birthday"}
+];
+
+const DAY_FILLS=[
+  {before:"Je travaille le ",blank:"lundi",after:" et le mardi.",hint:"first two working days"},
+  {before:"Le week-end, c'est ",blank:"samedi",after:" et dimanche.",hint:"day before Sunday"},
+  {before:"Mon cours de français est le ",blank:"mercredi",after:" soir.",hint:"3rd day of the week"},
+  {before:"C'est ",blank:"vendredi",after:" — la fin de la semaine!",hint:"TGIF in French!"}
+];
+
+const DAY_MCQ=[
+  {q:"Which day comes AFTER jeudi (Thursday)?",opts:["mercredi","vendredi","samedi","lundi"],ans:1,fb:"✅ Vendredi (Friday) comes after jeudi (Thursday). The order: lundi, mardi, mercredi, JEUDI, VENDREDI..."},
+  {q:"'Le lundi, je vais à la salle de sport.' This means:",opts:["Last Monday I went to the gym","I will go to the gym on Monday","I go to the gym every Monday","Monday is my day off"],ans:2,fb:"✅ LE + day = every that day (habitual). Le lundi = every Monday. Without LE: 'Lundi, j'y vais' = this specific Monday."},
+  {q:"Which day is NOT a working day (jour ouvrable) in France?",opts:["lundi","mardi","mercredi","dimanche"],ans:3,fb:"✅ Dimanche (Sunday) is never a regular working day in France. Most shops are closed. Samedi is sometimes open."}
+];
+
+const NUM_CONTEXTS=[
+  {ctx:"🎂 Age",fr:"Mon père a cinquante-cinq ans.",en:"My father is 55 years old.",speak:"Mon père a cinquante-cinq ans"},
+  {ctx:"📅 Year of birth",fr:"Je suis né(e) en mille neuf cent soixante-deux.",en:"I was born in 1962.",speak:"Je suis né en mille neuf cent soixante-deux"},
+  {ctx:"📞 Phone number",fr:"Mon numéro: zéro-six, quarante-deux, cinquante.",en:"My number: 06 42 50.",speak:"zéro-six, quarante-deux, cinquante"},
+  {ctx:"💶 Price",fr:"Ça coûte quarante-huit euros.",en:"It costs 48 euros.",speak:"Ça coûte quarante-huit euros"}
+];
+
+const NUM_DICT=[
+  {fr:"quarante",n:40},{fr:"cinquante-deux",n:52},{fr:"soixante",n:60},
+  {fr:"quarante-cinq",n:45},{fr:"soixante-dix",n:70}
+];
+
+const DATE_FILLS=[
+  {q:"Write: the 1st of January",ans:"le premier janvier",hint:"Remember: 1st = premier (not un)!",alt:["le 1er janvier","le premier janvier"]},
+  {q:"Write: the 14th of July (Bastille Day!)",ans:"le quatorze juillet",hint:"July in French = juillet",alt:["le 14 juillet","le quatorze juillet"]},
+  {q:"Write: the 25th of December (Christmas!)",ans:"le vingt-cinq décembre",hint:"December = décembre",alt:["le 25 décembre","le vingt-cinq décembre"]},
+  {q:"Write: 'My birthday is on the 8th of March'",ans:"mon anniversaire est le huit mars",hint:"Start with: Mon anniversaire est le...",alt:["mon anniversaire est le huit mars","mon anniversaire est le 8 mars"]}
+];
+
+const HOLIDAYS=[
+  {ico:"🎉",date:"1er janvier",name:"Le Jour de l'An",desc:"New Year's Day — La France fête la nouvelle année! Many people say 'Bonne année!'"},
+  {ico:"🐣",date:"variable (mars/avril)",name:"Pâques",desc:"Easter — A major Christian holiday. Family lunches, Easter eggs and chocolate!"},
+  {ico:"⚒️",date:"1er mai",name:"La Fête du Travail",desc:"Labour Day — Workers' Day. It is a national holiday. People give lily of the valley (muguet)!"},
+  {ico:"🏆",date:"8 mai",name:"La Victoire 1945",desc:"Victory in Europe Day — End of WW2 in 1945. Ceremonies at war memorials."},
+  {ico:"🇫🇷",date:"14 juillet",name:"La Fête Nationale",desc:"Bastille Day — France's national day! Military parade on the Champs-Élysées. Fireworks!"},
+  {ico:"⭐",date:"15 août",name:"L'Assomption",desc:"Assumption Day — A religious public holiday. Many shops close. Beach and family time!"},
+  {ico:"🕯️",date:"1er novembre",name:"La Toussaint",desc:"All Saints' Day — Families visit cemeteries to honor the dead with chrysanthemums."},
+  {ico:"☮️",date:"11 novembre",name:"L'Armistice 1918",desc:"Armistice Day — End of WW1. Ceremonies of remembrance across France."},
+  {ico:"🎄",date:"25 décembre",name:"Noël",desc:"Christmas — The biggest family holiday in France. Presents, réveillon dinner, 'Joyeux Noël!'"}
+];
+
+const COMP_MCQ=[
+  {q:"When is the rentrée scolaire (back to school) for the Diallo family?",opts:["Monday 3 January","Tuesday 3 January","Monday 3 February","Friday 3 January"],ans:0,fb:"✅ Le lundi 3 janvier = Monday 3rd January. 'Rentrée scolaire' = back to school. Very important date in France!"},
+  {q:"What does the father do on Valentine's Day (14 February)?",opts:["He goes to work","He buys chocolate","He offers flowers to the mother","He goes to the cinema"],ans:2,fb:"✅ 'Le père offre des fleurs à la mère' = the father offers flowers to the mother. Offrir = to offer/give as a gift."},
+  {q:"What is the mother's age?",opts:["40","45","50","55"],ans:1,fb:"✅ 'Elle a quarante-cinq ans' = she is 45 years old. Quarante-cinq = forty-five."},
+  {q:"On which day is France's national holiday?",opts:["1st May","15 August","14 July","25 December"],ans:2,fb:"✅ Le 14 juillet = Bastille Day / La Fête Nationale. The French celebrate with fireworks and a military parade in Paris!"},
+  {q:"What does Aminata love?",opts:["Flowers","Chocolate cake","Cinema","Football"],ans:1,fb:"✅ 'Elle adore le gâteau au chocolat' = she loves chocolate cake. Adorer = to love/adore. Gâteau = cake."}
+];
+
+const TROUS=[
+  {before:"Le ",b1:"lundi",mid:" 3 janvier, c'est la rentrée ",b2:"scolaire",after:".",h1:"day of the week",h2:"type of return (school...)"},
+  {before:"Le père offre des ",b1:"fleurs",mid:" à la mère le ",b2:"quatorze",after:" février.",h1:"what he gives her",h2:"the date in French"},
+  {before:"Elle a ",b1:"quarante-cinq",mid:" ans. Son anniversaire est le ",b2:"dimanche",after:" 8 mars.",h1:"her age in French",h2:"day of the week"},
+  {before:"Le ",b1:"vingt-cinq",mid:" décembre, c'est ",b2:"Noël",after:".",h1:"the date (25 in French)",h2:"the holiday"},
+  {before:"Le père a ",b1:"cinquante",mid:" ans. Son anniversaire est en ",b2:"juin",after:".",h1:"his age in French (50)",h2:"his birth month"}
+];
+
+const WRITING_TASKS=[
+  {id:"wt1",label:"Task 1 — Write about YOUR birthday and week",prompt:"Write 6–8 sentences about yourself. Include: your birthday date, what day of the week it falls on, your age, and what you do on each day of the week.",hint:"Mon anniversaire est le [date]. Je suis né(e) le... J'ai ... ans. Le lundi, je... Le mardi, je... Mon jour préféré est le... parce que...",starter:"Bonjour! Je m'appelle... Mon anniversaire est le...",checks:{hasDate:/le \d|le premier|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche/i,hasAge:/ans/i,hasVerb:/je|j'ai|j'habite|je travaille|je vais|j'aime|je vis/i,hasDay:/lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche/i}},
+  {id:"wt2",label:"Task 2 — Describe a French public holiday",prompt:"Write 4–6 sentences about ONE French public holiday. Describe: the date, the name of the holiday, what people do that day, and whether your family celebrates it.",hint:"La [holiday] est le [date]. C'est un jour férié en France. Les Français [activity]. Ma famille [celebrates/doesn't celebrate]. J'aime cette fête parce que...",starter:"La fête que j'aime est...",checks:{hasDate:/le \d|le premier|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre/i,hasHoliday:/noël|pâques|travail|juillet|toussaint|fête|anniversaire/i,hasFr:/les français|la famille|on célèbre|on mange|on regarde/i}}
+];
+
+const MIRRORS=[
+  {fr:"Mon anniversaire est le quinze août.",en:"My birthday is August 15th.",note:"le + number + month — the French date formula!"},
+  {fr:"Je suis née le trois mars mille neuf cent quatre-vingt-dix-huit.",en:"I was born on March 3rd, 1998.",note:"Née = born (feminine). Né = born (masculine)."},
+  {fr:"C'est quand ton anniversaire?",en:"When is your birthday?",note:"Informal question. Formal: 'Quelle est la date de votre anniversaire?'"},
+  {fr:"Le lundi, je travaille. Le vendredi, je me repose.",en:"On Mondays I work. On Fridays I rest.",note:"LE + day = every week. Notice the difference from 'lundi je travaille'!"},
+  {fr:"Joyeux anniversaire! Tu as quel âge maintenant?",en:"Happy birthday! How old are you now?",note:"Joyeux anniversaire = Happy birthday! Tu as quel âge = How old are you?"},
+  {fr:"La Fête Nationale française est le quatorze juillet.",en:"The French national holiday is the 14th of July.",note:"This sentence is perfect for TCF/TEF culture questions!"},
+  {fr:"Nous avons quarante-cinq étudiants dans notre classe.",en:"We have 45 students in our class.",note:"Liaison: Nous‿avons = noozavon. Don't forget the S!"},
+  {fr:"Le réveillon du Jour de l'An est le trente et un décembre.",en:"New Year's Eve is on December 31st.",note:"Trente et un = 31. Always 'et un' for 21, 31, 41, 51, 61."},
+  {fr:"C'est aujourd'hui mercredi le vingt-deux juin.",en:"Today is Wednesday the 22nd of June.",note:"Full date format: day + le + number + month. TCF loves this!"},
+  {fr:"Mon père est né en mille neuf cent soixante.",en:"My father was born in 1960.",note:"Year formula: en + mille neuf cent... Soixante = 60."},
+  {fr:"Il y a cinquante étudiants dans cette école.",en:"There are 50 students in this school.",note:"Il y a = there is/are. Cinquante = 50. Very useful sentence!"},
+  {fr:"La semaine prochaine, c'est lundi le premier mai.",en:"Next week is Monday the 1st of May.",note:"Premier = 1st (not un). Always use premier for the first of the month."},
+  {fr:"Samedi et dimanche sont les jours du week-end.",en:"Saturday and Sunday are the weekend days.",note:"In French, the week officially starts on Monday, not Sunday!"},
+  {fr:"Mon cours de français est le mardi soir à dix-neuf heures.",en:"My French class is on Tuesday evening at 7pm.",note:"19h = 7pm in French time. France uses 24-hour clock."},
+  {fr:"Bonne année et joyeux Noël à toute la famille!",en:"Happy New Year and Merry Christmas to the whole family!",note:"Key holiday greetings! Bonne année = Happy New Year · Joyeux Noël = Merry Christmas"}
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let curSec=1,cTimer=null;
+let blobs={},mediaRecs={},compDone={},bioDone={};
+let step2Visible=false,enVisible=false;
+
+// ============================================================
+// SPEECH
+// ============================================================
+function getVoice(){const vs=window.speechSynthesis.getVoices();return vs.find(v=>v.lang==='fr-FR')||vs.find(v=>v.lang.startsWith('fr'))||null;}
+function spkText(t,btn,rate){
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  const v=getVoice();if(v)u.voice=v;u.lang='fr-FR';u.rate=rate||0.82;u.pitch=1.02;
+  if(btn&&btn.classList){btn.classList.add('playing');u.onend=()=>btn.classList.remove('playing');}
+  window.speechSynthesis.speak(u);
+}
+
+// SYNC LISTEN
+let syncInt=null;
+function syncListen(rate,btn){
+  if(syncInt)clearInterval(syncInt);window.speechSynthesis.cancel();
+  const el=document.getElementById('storyDisplay');
+  el.innerHTML=STORY_WORDS.map((w,i)=>`<span id="sw${i}">${w} </span>`).join('');
+  const ms=rate>0.7?420:700;
+  const u=new SpeechSynthesisUtterance(STORY_FR);
+  const v=getVoice();if(v)u.voice=v;u.lang='fr-FR';u.rate=rate;
+  if(btn&&btn.classList){btn.classList.add('playing');u.onend=()=>btn.classList.remove('playing');}
+  window.speechSynthesis.speak(u);
+  let idx=0;
+  syncInt=setInterval(()=>{
+    document.querySelectorAll('#storyDisplay span').forEach(s=>s.style.background='');
+    if(idx<STORY_WORDS.length){const sw=document.getElementById('sw'+idx);if(sw){sw.style.background='rgba(194,65,12,.2)';sw.style.borderRadius='3px';sw.scrollIntoView({block:'nearest',behavior:'smooth'});}idx++;}
+    else clearInterval(syncInt);
+  },ms);
+}
+
+function showStep2(){
+  step2Visible=true;document.getElementById('step2box').style.display='block';
+  document.getElementById('storyDisplay').innerHTML=STORY_WORDS.map((w,i)=>`<span id="sw${i}">${w} </span>`).join('');
+  showCoach('🎉 Step 2 unlocked! Listen again and follow the text. Then do the copying activity below!',6000);
+  document.getElementById('step2box').scrollIntoView({behavior:'smooth'});
+}
+function togglePlay(){const b=document.getElementById('playBtn');b.textContent=b.textContent==='▶'?'⏸':'▶';}
+function toggleEn(){enVisible=!enVisible;document.getElementById('storyEn').classList.toggle('show',enVisible);}
+
+// ============================================================
+// RECORDING
+// ============================================================
+async function dRec(recId,pbId){
+  const btn=document.getElementById(recId);if(!btn)return;
+  if(mediaRecs[recId]&&mediaRecs[recId].state==='recording'){mediaRecs[recId].stop();return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});let chunks=[];const mr=new MediaRecorder(stream);mediaRecs[recId]=mr;
+    mr.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    mr.onstop=()=>{blobs[pbId]=new Blob(chunks,{type:'audio/webm'});stream.getTracks().forEach(t=>t.stop());btn.classList.remove('on');btn.textContent='🎤 Record Again';const pb=document.getElementById(pbId);if(pb)pb.classList.add('show');showCoach('✅ Recorded! Press ▶️ to hear yourself back.',3500);};
+    mr.start();btn.classList.add('on');btn.textContent='⏹ Stop';showCoach('🎤 Recording... Speak clearly. Press Stop when done.',0);
+  } catch(e){if(btn.classList.contains('on')){btn.classList.remove('on');btn.textContent='🎤 Record Again';}else{btn.classList.add('on');btn.textContent='⏹ Stop';showCoach('🎤 Recording... Press Stop when done.',0);}}
+}
+function pBlob(pbId){if(!blobs[pbId])return;const url=URL.createObjectURL(blobs[pbId]);new Audio(url).play();showCoach('👂 Compare your pronunciation to the native speaker. Try again!',4500);}
+
+// ============================================================
+// NAV
+// ============================================================
+function goSec(n){
+  document.getElementById('sec'+curSec).classList.remove('show');
+  curSec=n;document.getElementById('sec'+n).classList.add('show');
+  updDots();document.getElementById('progBar').style.width=(((n-1)/7)*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+  const msgs=["","🎧 Listen first — close your eyes and just let the French sounds wash over you. Then press Show Text!","📅 Days of the week — in French they are NOT capitalised! Notice the difference from English.","🔢 Numbers 40–70. Listen, tap, repeat. The trick for 70: soixante-dix = sixty + ten!","🎂 Dates and birthdays! This is the format you WILL be asked about in TCF/TEF Canada.","📖 The Diallo family calendar! Read, listen, answer — 3 listens is normal and healthy at A1.","✍️ Writing time! Use the sentence patterns. Write YOUR real dates. Screenshot and share!","🪞 15 mirror sentences — all about dates and days. Your mouth learns French through repetition!"];
+  if(msgs[n])showCoach(msgs[n],6000);
+}
+function buildDots(){document.getElementById('dotsWrap').innerHTML=[1,2,3,4,5,6,7].map(i=>`<div class="dot ${i===1?'active':''}" id="dot${i}" onclick="goSec(${i})">${i}</div>`).join('');}
+function updDots(){for(let i=1;i<=7;i++){const d=document.getElementById('dot'+i);d.className='dot'+(i<curSec?' done':i===curSec?' active':'');}}
+
+// ============================================================
+// UNDERSTAND BAR
+// ============================================================
+function renderUbar(id,fbId){
+  const opts=[{l:"😕 Not much",v:1},{l:"🤔 A little",v:2},{l:"🙂 Most of it",v:3},{l:"🎉 All of it!",v:4}];
+  document.getElementById(id).innerHTML=opts.map((o,i)=>`<button class="ubtn" id="${id}b${i}" onclick="selUbar('${id}','${fbId}',${o.v},${i})">${o.l}</button>`).join('');
+}
+function selUbar(uid,fbId,v,idx){
+  document.querySelectorAll('#'+uid+' .ubtn').forEach(b=>b.classList.remove('sel'));document.getElementById(uid+'b'+idx).classList.add('sel');
+  const fb=document.getElementById(fbId);fb.style.display='block';
+  const m={1:{bg:'#FEE2E2',c:'#991B1B',t:'Normal at A1! You need at least 3 listens. Press listen again — each time you catch more!'},
+    2:{bg:'#FEF3C7',c:'#92400E',t:'Getting there! Listen one more time and focus on the highlighted words.'},
+    3:{bg:'#D1FAE5',c:'#065F46',t:'🎉 Excellent! Your French ear is developing fast. One more listen to catch everything.'},
+    4:{bg:'#D1FAE5',c:'#065F46',t:'🏆 INCROYABLE! Understanding everything is a major A1 achievement. Your brain is working!'}};
+  fb.style.background=m[v].bg;fb.style.color=m[v].c;fb.textContent=m[v].t;
+  if(v===4)confetti();
+  showCoach(v<=2?'💡 Listen 3 times — that\'s the rule for A1 learners!':'🌟 Your comprehension is growing!',4000);
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+
+// Story Copies
+function renderCopies(){
+  document.getElementById('copyActivities').innerHTML=STORY_COPIES.map((c,i)=>`
+    <div class="copy-box" style="margin-bottom:12px">
+      <div style="font-size:.68rem;font-weight:800;color:var(--go);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📝 Copy Sentence ${i+1}</div>
+      <div class="copy-src">${c.text}</div>
+      <div style="font-size:.73rem;color:var(--gy);font-style:italic;margin-bottom:8px">${c.en}</div>
+      <textarea class="copy-inp" id="cp${i}" rows="2" placeholder="Copy the French sentence here exactly..."></textarea>
+      <div class="aud-row" style="margin-top:7px;gap:6px">
+        <button class="btn-or" style="min-height:38px;padding:0 12px;font-size:.76rem" onclick="spkText('${c.text.replace(/'/g,"\\'")}',this)">🔊 Hear It</button>
+        <button class="btn-gn" style="min-height:38px;padding:0 12px;font-size:.76rem" onclick="checkCopy(${i})">✅ Check Copy</button>
+        <button class="redo-btn" onclick="document.getElementById('cp${i}').value=''">🔄</button>
+      </div>
+      <div id="cpfb${i}" style="display:none;margin-top:7px;padding:8px 11px;border-radius:9px;font-size:.77rem;font-weight:700"></div>
+    </div>`).join('');
+}
+function checkCopy(i){
+  const val=document.getElementById('cp'+i).value.trim();const ref=STORY_COPIES[i].text;
+  const ok=val===ref;const close=val.toLowerCase()===ref.toLowerCase();
+  const fb=document.getElementById('cpfb'+i);fb.style.display='block';
+  if(ok){fb.style.background='#D1FAE5';fb.style.color='#065F46';fb.textContent='✅ Perfect copy! Every letter, accent and punctuation is correct!';spkText(ref,null);confetti();}
+  else if(close){fb.style.background='#FEF3C7';fb.style.color='#92400E';fb.textContent='Almost! Check your capital letters and accents (é, è, à etc.). In French, accents change the meaning!';}
+  else{fb.style.background='#EDE9FE';fb.style.color='#5B21B6';fb.textContent='💡 Compare word by word with the original above. Copy one word at a time if needed!';}
+}
+
+// Story Fills
+function renderStoryFills(){
+  document.getElementById('storyFills').innerHTML=STORY_FILLS.map((f,i)=>`
+    <div class="fill-wrap" id="sfw${i}" style="margin-bottom:9px">
+      <div class="fill-q">${f.before}<input class="fill-inp" id="sfi${i}" placeholder="${f.hint}" autocomplete="off" autocorrect="off" spellcheck="false">${f.after}</div>
+    </div>`).join('');
+}
+function checkStoryFills(){
+  let ok=0;
+  STORY_FILLS.forEach((f,i)=>{const v=document.getElementById('sfi'+i).value.trim().toLowerCase();const good=v===f.blank.toLowerCase();document.getElementById('sfi'+i).classList.toggle('ok',good);document.getElementById('sfi'+i).classList.toggle('bad',!good);if(good)ok++;});
+  const fb=document.getElementById('storyFillFb');fb.style.display='block';
+  const all=ok===STORY_FILLS.length;fb.style.background=all?'#D1FAE5':'#FEF3C7';fb.style.color=all?'#065F46':'#92400E';
+  fb.textContent=all?'🎉 All correct! You read French with real comprehension!':'✅ '+ok+'/'+STORY_FILLS.length+' correct. The answers are all in the story above — look carefully!';
+  if(all)confetti();
+  showCoach(all?'🏆 Parfait! All answers correct!':'💡 Look at the story text above for the missing words.',4500);
+}
+function resetStoryFills(){STORY_FILLS.forEach((_,i)=>{const inp=document.getElementById('sfi'+i);inp.value='';inp.className='fill-inp';});document.getElementById('storyFillFb').style.display='none';}
+
+// Days Grid
+function renderDays(){
+  document.getElementById('daysGrid').innerHTML=DAYS.map((d,i)=>`
+    <div class="day-card" onclick="spkText('${d.fr}',null);this.classList.add('sel');setTimeout(()=>this.classList.remove('sel'),800)">
+      <div class="dc-ico">${d.ico}</div>
+      <div class="dc-fr">${d.fr}</div>
+      <div class="dc-en" id="dce${i}" onclick="event.stopPropagation();document.getElementById('dce${i}').classList.toggle('reveal')">${d.en}</div>
+      <div class="dc-num">${d.num}</div>
+    </div>`).join('');
+}
+function renderDayFills(){
+  document.getElementById('dayFills').innerHTML=DAY_FILLS.map((f,i)=>`
+    <div class="fill-wrap" id="dfw${i}" style="margin-bottom:9px">
+      <div class="fill-q">${f.before}<input class="fill-inp" id="dfi${i}" placeholder="${f.hint}" autocomplete="off" autocorrect="off" spellcheck="false">${f.after}</div>
+    </div>`).join('');
+}
+function checkDayFills(){
+  let ok=0;
+  DAY_FILLS.forEach((f,i)=>{const v=document.getElementById('dfi'+i).value.trim().toLowerCase();const good=v===f.blank.toLowerCase();document.getElementById('dfi'+i).classList.toggle('ok',good);document.getElementById('dfi'+i).classList.toggle('bad',!good);if(good)ok++;});
+  const fb=document.getElementById('dayFillFb');fb.style.display='block';const all=ok===DAY_FILLS.length;
+  fb.style.background=all?'#D1FAE5':'#FEF3C7';fb.style.color=all?'#065F46':'#92400E';
+  fb.textContent=all?'🎉 All days correct! You know your French week!':'✅ '+ok+'/'+DAY_FILLS.length+' correct. Hint: the days go lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche.';
+  if(all)confetti();showCoach(all?'📅 Les jours de la semaine — mastered!':'💡 Check the days grid above for the order.',4000);
+}
+function resetDayFills(){DAY_FILLS.forEach((_,i)=>{const inp=document.getElementById('dfi'+i);inp.value='';inp.className='fill-inp';});document.getElementById('dayFillFb').style.display='none';}
+function renderDayMCQ(){
+  document.getElementById('dayMCQ').innerHTML=DAY_MCQ.map((q,i)=>`
+    <div class="mcq-wrap">
+      <div style="font-size:.67rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Question ${i+1}</div>
+      <div class="mcq-q">${q.q}</div>
+      ${q.opts.map((o,j)=>`<div class="mcq-opt" id="mo${i}_${j}" onclick="selMCQ(${i},${j},'mo','mf')"><div style="width:24px;height:24px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;flex-shrink:0">${String.fromCharCode(65+j)}</div>${o}</div>`).join('')}
+      <div class="mcq-fb" id="mf${i}"></div>
+    </div>`).join('');
+}
+let dayMCQdone={};
+function selMCQ(qi,oi,prefix,fbPrefix){
+  if(dayMCQdone[qi])return;dayMCQdone[qi]=true;
+  const ok=oi===DAY_MCQ[qi].ans;
+  DAY_MCQ[qi].opts.forEach((_,j)=>{const el=document.getElementById(`${prefix}${qi}_${j}`);if(!el)return;el.classList.add('dis');if(j===DAY_MCQ[qi].ans)el.classList.add('co');else if(j===oi&&!ok)el.classList.add('wo');});
+  const fb=document.getElementById(`${fbPrefix}${qi}`);fb.className='mcq-fb show';
+  fb.style.background=ok?'#D1FAE5':'#EDE9FE';fb.style.color=ok?'#065F46':'#5B21B6';
+  fb.textContent=(ok?'✅ ':'💡 ')+DAY_MCQ[qi].fb;
+  showCoach(ok?'🎉 Correct!':'💡 Read the explanation carefully.',4000);
+  if(ok)confetti();
+}
+
+// Numbers
+function renderNumbers(){
+  document.getElementById('numGrid40').innerHTML=NUMS.map(n=>`
+    <div class="num-card" onclick="spkText('${n.fr}',null)">
+      <div class="nc-num">${n.n}</div>
+      <div class="nc-fr">${n.fr}</div>
+      <div class="nc-ph">[${n.ph}]</div>
+    </div>`).join('');
+}
+function renderNumContexts(){
+  document.getElementById('numContexts').innerHTML=NUM_CONTEXTS.map((c,i)=>`
+    <div style="background:#fff;border:1.5px solid var(--bdr);border-radius:13px;padding:13px;margin-bottom:9px;border-left:3px solid var(--or)">
+      <div style="font-size:.68rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.ctx}</div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--dk);margin-bottom:3px">${c.fr}</div>
+      <div style="font-size:.76rem;color:var(--gy);filter:blur(4px);cursor:pointer;transition:filter .3s" id="nce${i}" onclick="document.getElementById('nce${i}').style.filter='none'">${c.en}</div>
+      <div class="aud-row" style="margin-top:8px;gap:6px">
+        <button class="btn-or" style="min-height:38px;padding:0 12px;font-size:.76rem" onclick="spkText('${c.speak.replace(/'/g,"\\'")}',this)">🔊 Hear</button>
+        <button class="btn-rec" id="ncr${i}" style="min-height:38px;padding:0 12px;font-size:.76rem" onclick="dRec('ncr${i}','ncp${i}')">🎤 Say It</button>
+        <button class="btn-pb" id="ncp${i}" style="min-height:38px;padding:0 10px;font-size:.76rem" onclick="pBlob('ncp${i}')">▶️</button>
+      </div>
+    </div>`).join('');
+}
+function renderNumDict(){
+  document.getElementById('numDictation').innerHTML=NUM_DICT.map((d,i)=>`
+    <div style="background:var(--orl);border-radius:12px;padding:13px;margin-bottom:10px;border:1.5px solid #FED7AA">
+      <div style="font-size:.68rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Dictation ${i+1}</div>
+      <div class="aud-row" style="margin-bottom:10px">
+        <button class="btn-or" style="min-height:40px;padding:0 14px;font-size:.78rem" onclick="spkText('${d.fr}',this)">🔊 Listen — write what you hear</button>
+        <button class="btn-out" style="min-height:40px;padding:0 12px;font-size:.76rem" onclick="spkText('${d.fr}',this,0.55)">🐢 Slow</button>
+      </div>
+      <input class="dict-inp" id="nd${i}" placeholder="Write the number in French..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="aud-row" style="margin-top:7px;gap:6px">
+        <button class="btn-gn" style="min-height:38px;padding:0 14px;font-size:.76rem" onclick="checkDict(${i})">✅ Check</button>
+        <button class="redo-btn" onclick="document.getElementById('nd${i}').value='';document.getElementById('ndfb${i}').style.display='none';document.getElementById('nd${i}').className='dict-inp'">🔄</button>
+      </div>
+      <div id="ndfb${i}" style="display:none;margin-top:7px;padding:8px 11px;border-radius:9px;font-size:.77rem;font-weight:700"></div>
+    </div>`).join('');
+}
+function checkDict(i){
+  const val=document.getElementById('nd'+i).value.trim().toLowerCase();const ans=NUM_DICT[i].fr.toLowerCase();
+  const ok=val===ans||val===String(NUM_DICT[i].n);
+  const inp=document.getElementById('nd'+i);inp.classList.toggle('ok',ok);inp.classList.toggle('bad',!ok);
+  const fb=document.getElementById('ndfb'+i);fb.style.display='block';
+  if(ok){fb.style.background='#D1FAE5';fb.style.color='#065F46';fb.textContent='✅ Correct! '+NUM_DICT[i].n+' = '+NUM_DICT[i].fr;confetti();}
+  else{fb.style.background='#EDE9FE';fb.style.color='#5B21B6';fb.textContent='💡 The answer is: "'+NUM_DICT[i].fr+'" ('+NUM_DICT[i].n+'). Listen again and try to hear the exact French sounds!';}
+  showCoach(ok?'🔢 Dictation correct! Your ear is working!':'💡 Listen again slowly — try to catch each syllable.',4000);
+}
+
+// Months
+function renderMonths(){
+  document.getElementById('monthsGrid').innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">`+
+  MONTHS.map(m=>`
+    <div style="background:#fff;border:1.5px solid var(--bdr);border-radius:11px;padding:10px 9px;text-align:center;cursor:pointer;transition:all .2s" onclick="spkText('${m.fr}',null);this.style.borderColor='var(--or)';setTimeout(()=>this.style.borderColor='var(--bdr)',800)">
+      <div style="font-size:.7rem;font-weight:800;color:var(--or);margin-bottom:2px">${m.num}</div>
+      <div style="font-size:.85rem;font-weight:800;color:var(--dk)">${m.fr}</div>
+      <div style="font-size:.68rem;color:var(--gy);filter:blur(3px);cursor:pointer;transition:filter .3s" onclick="event.stopPropagation();this.style.filter='none'">${m.en}</div>
+    </div>`).join('')+'</div>';
+}
+
+// Date fills
+function renderDateFills(){
+  document.getElementById('dateFills').innerHTML=DATE_FILLS.map((f,i)=>`
+    <div style="background:var(--orl);border-radius:12px;padding:13px;margin-bottom:10px;border:1.5px solid #FED7AA">
+      <div style="font-size:.68rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Date ${i+1}</div>
+      <div style="font-size:.88rem;font-weight:700;color:var(--dk);margin-bottom:5px">${f.q}</div>
+      <div style="font-size:.73rem;color:#92400E;margin-bottom:9px;background:rgba(255,255,255,.5);padding:5px 9px;border-radius:7px">💡 ${f.hint}</div>
+      <input class="fill-inp" style="width:100%;max-width:100%" id="df${i}" placeholder="Write the date in French..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="aud-row" style="margin-top:7px;gap:5px">
+        <button class="fill-btn" onclick="checkOneDateFill(${i})">✅ Check</button>
+        <button class="redo-btn" onclick="document.getElementById('df${i}').value='';document.getElementById('dff${i}').style.display='none'">🔄</button>
+        <button class="btn-or" style="min-height:36px;padding:0 11px;font-size:.74rem" onclick="spkText(document.getElementById('df${i}').value,this)">🔊 Hear</button>
+      </div>
+      <div id="dff${i}" style="display:none;margin-top:7px;padding:8px 11px;border-radius:9px;font-size:.78px;font-weight:700"></div>
+    </div>`).join('');
+}
+let dateDone={};
+function checkOneDateFill(i){
+  const val=document.getElementById('df'+i).value.trim().toLowerCase();
+  const ok=DATE_FILLS[i].alt.some(a=>val.includes(a.toLowerCase())||a.toLowerCase().includes(val))||val===DATE_FILLS[i].ans.toLowerCase();
+  const fb=document.getElementById('dff'+i);fb.style.display='block';fb.style.fontSize='.78rem';
+  if(ok){fb.style.background='#D1FAE5';fb.style.color='#065F46';fb.textContent='✅ Correct! '+DATE_FILLS[i].ans;dateDone[i]=true;confetti();}
+  else{fb.style.background='#EDE9FE';fb.style.color='#5B21B6';fb.textContent='💡 Expected: '+DATE_FILLS[i].ans+'. Remember: le + number + month. For the 1st: le premier!';}
+  showCoach(ok?'📅 Date format correct!':'💡 French date = le + number + month.',3500);
+}
+function checkDateFills(){DATE_FILLS.forEach((_,i)=>checkOneDateFill(i));}
+function resetDateFills(){DATE_FILLS.forEach((_,i)=>{document.getElementById('df'+i).value='';document.getElementById('dff'+i).style.display='none';});}
+
+// Holidays
+function renderHolidays(){
+  document.getElementById('holidaysGrid').innerHTML=HOLIDAYS.map(h=>`
+    <div class="holiday-card">
+      <div class="h-ico">${h.ico}</div>
+      <div>
+        <div class="h-date">📅 ${h.date}</div>
+        <div class="h-name">${h.name}</div>
+        <div class="h-desc">${h.desc}</div>
+        <div class="aud-row" style="margin-top:7px;gap:5px">
+          <button class="btn-or" style="min-height:34px;padding:0 10px;font-size:.72rem" onclick="spkText('${h.name.replace(/'/g,"\\'")}',this)">🔊 Name</button>
+          <button class="btn-out" style="min-height:34px;padding:0 10px;font-size:.72rem" onclick="spkText('${h.date.replace(/[éè]/g,c=>c).replace(/'/g,"\\'")}',this)">🔊 Date</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// Comprehension MCQ
+let compMCQdone={};
+function renderCompMCQ(){
+  document.getElementById('compMCQ').innerHTML=COMP_MCQ.map((q,i)=>`
+    <div class="mcq-wrap">
+      <div style="font-size:.67rem;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Question ${i+1} of ${COMP_MCQ.length}</div>
+      <div class="mcq-q">${q.q}</div>
+      ${q.opts.map((o,j)=>`<div class="mcq-opt" id="cm${i}_${j}" onclick="selCompMCQ(${i},${j})"><div style="width:24px;height:24px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;flex-shrink:0">${String.fromCharCode(65+j)}</div>${o}</div>`).join('')}
+      <div class="mcq-fb" id="cf${i}"></div>
+    </div>`).join('');
+}
+function selCompMCQ(qi,oi){
+  if(compMCQdone[qi])return;compMCQdone[qi]=true;
+  const ok=oi===COMP_MCQ[qi].ans;
+  COMP_MCQ[qi].opts.forEach((_,j)=>{const el=document.getElementById(`cm${qi}_${j}`);if(!el)return;el.classList.add('dis');if(j===COMP_MCQ[qi].ans)el.classList.add('co');else if(j===oi&&!ok)el.classList.add('wo');});
+  const fb=document.getElementById('cf'+qi);fb.className='mcq-fb show';
+  fb.style.background=ok?'#D1FAE5':'#EDE9FE';fb.style.color=ok?'#065F46':'#5B21B6';
+  fb.textContent=(ok?'✅ ':'💡 ')+COMP_MCQ[qi].fb;
+  showCoach(ok?'🎉 Correct! You understood the passage!':'💡 Look at the highlighted words in the passage. The answer is there!',5000);
+  if(ok)confetti();
+}
+
+// Texte à Trous
+function renderTrous(){
+  document.getElementById('trousEx').innerHTML=TROUS.map((t,i)=>`
+    <div class="trous-s" id="ts${i}">
+      <div style="font-size:.68px;font-weight:800;color:var(--or);text-transform:uppercase;margin-bottom:6px;font-size:.67rem">Sentence ${i+1}</div>
+      ${t.before}<input class="trous-inp" id="ta${i}" placeholder="${t.h1}" autocomplete="off" autocorrect="off" spellcheck="false">${t.mid}<input class="trous-inp" id="tb${i}" placeholder="${t.h2}" autocomplete="off" autocorrect="off" spellcheck="false">${t.after}
+      <div id="tf${i}" style="font-size:.75rem;margin-top:5px;font-weight:700;display:none"></div>
+    </div>`).join('');
+}
+function checkTrous(){
+  let ok=0,tot=TROUS.length*2;
+  TROUS.forEach((t,i)=>{
+    const a=document.getElementById('ta'+i).value.trim().toLowerCase();const b=document.getElementById('tb'+i).value.trim().toLowerCase();
+    const aok=a===t.b1.toLowerCase();const bok=b===t.b2.toLowerCase();
+    document.getElementById('ta'+i).classList.toggle('ok',aok);document.getElementById('ta'+i).classList.toggle('bad',!aok);
+    document.getElementById('tb'+i).classList.toggle('ok',bok);document.getElementById('tb'+i).classList.toggle('bad',!bok);
+    if(aok)ok++;if(bok)ok++;
+    const fb=document.getElementById('tf'+i);fb.style.display='block';
+    fb.style.color=aok&&bok?'#065F46':'#DC2626';
+    fb.textContent=aok&&bok?'✅ Both correct!':'❌ Answers: "'+t.b1+'" and "'+t.b2+'"';
+    document.getElementById('ts'+i).classList.toggle('ok',aok&&bok);
+  });
+  const fb=document.getElementById('trousFb');fb.style.display='block';
+  fb.style.background=ok===tot?'#D1FAE5':'#FEF3C7';fb.style.color=ok===tot?'#065F46':'#92400E';
+  fb.textContent=ok===tot?'🎉 Perfect! All '+tot+' gaps filled correctly. Your listening comprehension is working!':'✅ '+ok+'/'+tot+' correct. Listen again and check the highlighted gaps.';
+  if(ok===tot)confetti();
+}
+function resetTrous(){TROUS.forEach((_,i)=>{['ta','tb'].forEach(p=>{const inp=document.getElementById(p+i);if(inp){inp.value='';inp.className='trous-inp';}});document.getElementById('ts'+i).className='trous-s';document.getElementById('tf'+i).style.display='none';});document.getElementById('trousFb').style.display='none';}
+
+// Writing
+function renderWriting(){
+  document.getElementById('writingTasks').innerHTML=WRITING_TASKS.map(t=>`
+    <div style="background:#fff;border:1.5px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+      <div class="badge b-gn" style="margin-bottom:12px">${t.label}</div>
+      <div class="write-prompt">
+        <div class="wp-lbl">Your Task</div>
+        <div class="wp-q">${t.prompt}</div>
+        <div class="wp-hint">💡 ${t.hint}</div>
+      </div>
+      <div style="font-size:.73rem;color:var(--gy);margin-bottom:7px;font-style:italic">Starter: <em style="color:var(--or)">${t.starter}</em></div>
+      <textarea class="write-inp" id="${t.id}" rows="6" placeholder="Écrivez ici en français..." oninput="updateWC('${t.id}','${t.id}wc')"></textarea>
+      <div style="font-size:.68rem;color:var(--gy);text-align:right;margin-top:3px" id="${t.id}wc">0 words</div>
+      <div class="aud-row" style="margin-top:9px;gap:7px">
+        <button class="btn-gn" onclick="checkWT('${t.id}','${t.id}fb')">✅ Check My Writing</button>
+        <button class="btn-or" onclick="spkText(document.getElementById('${t.id}').value,this)">🔊 Hear It</button>
+        <button class="redo-btn" onclick="document.getElementById('${t.id}').value='';document.getElementById('${t.id}fb').className='write-fb';document.getElementById('${t.id}wc').textContent='0 words'">🔄 Reset</button>
+      </div>
+      <div class="write-fb" id="${t.id}fb"></div>
+    </div>`).join('');
+}
+function updateWC(id,wcId){const t=document.getElementById(id).value.trim();document.getElementById(wcId).textContent=(t?t.split(/\s+/).length:0)+' words';}
+function checkWT(id,fbId){
+  const t=document.getElementById(id).value.trim();if(!t){showCoach('✏️ Write something first!',3000);return;}
+  const task=WRITING_TASKS.find(w=>w.id===id);const wc=t?t.split(/\s+/).length:0;
+  const ok=[],issues=[];
+  if(task.checks.hasDate.test(t))ok.push('✅ Date/day mentioned');else issues.push('❌ Include a date or day: Le lundi... / Mon anniversaire est le...');
+  if(task.checks.hasVerb.test(t))ok.push('✅ Verb usage good');else issues.push('❌ Use action verbs: je travaille, je vais, j\'aime, je célèbre...');
+  if(task.checks.hasDay&&task.checks.hasDay.test(t))ok.push('✅ Day of week used');
+  if(task.id==='wt2'&&task.checks.hasHoliday){if(task.checks.hasHoliday.test(t))ok.push('✅ Holiday name mentioned');else issues.push('❌ Name the holiday: Noël, Pâques, la Fête Nationale, la Fête du Travail...');}
+  if(task.id==='wt2'&&task.checks.hasFr){if(task.checks.hasFr.test(t))ok.push('✅ What people do mentioned');else issues.push('❌ Describe what people do that day: Les Français... / On mange... / On regarde...');}
+  if(wc>=30)ok.push('✅ Good length ('+wc+' words)');else issues.push('📝 Write more — aim for 40+ words!');
+  const fb=document.getElementById(fbId);fb.classList.add('show');
+  fb.style.background=issues.length===0?'#D1FAE5':'#FEF3C7';fb.style.color=issues.length===0?'#065F46':'#92400E';
+  fb.innerHTML=ok.map(o=>`<div>${o}</div>`).join('')+(issues.length?'<br>'+issues.map(i=>`<div>${i}</div>`).join(''):'');
+  if(issues.length===0){showCoach('🏆 Excellent writing! Screenshot and share in the community!',6000);confetti();}
+  else showCoach('💜 Good effort! Use the sentence patterns in the grammar box above.',5000);
+  setTimeout(()=>spkText(t,null,0.82),600);
+}
+function copyWriting(){
+  const t1=document.getElementById('wt1')?.value||'';const t2=document.getElementById('wt2')?.value||'';
+  navigator.clipboard.writeText(t1+'\n\n'+t2).then(()=>{document.getElementById('copyFb').style.display='block';confetti();}).catch(()=>{document.getElementById('copyFb').style.display='block';document.getElementById('copyFb').textContent='Select your text manually and copy it.';});
+}
+
+// Mirror Cards
+function renderMirrors(){
+  document.getElementById('mirrorCards').innerHTML=MIRRORS.map((m,i)=>`
+    <div class="mirror-card" id="mir${i}">
+      <div class="mir-num">🪞 Mirror Practice ${i+1} of ${MIRRORS.length}</div>
+      <div class="mir-fr">${m.fr}</div>
+      <div class="mir-en" id="men${i}" onclick="document.getElementById('men${i}').classList.toggle('show')">${m.en} — tap to reveal</div>
+      <div class="mir-note">💡 ${m.note}</div>
+      <div class="aud-row">
+        <button class="btn-or" style="min-height:40px;padding:0 13px;font-size:.78rem" onclick="spkText('${m.fr.replace(/'/g,"\\'")}',this)">🔊 Hear</button>
+        <button class="btn-or" style="min-height:40px;padding:0 13px;font-size:.78rem;background:#0891B2" onclick="spkText('${m.fr.replace(/'/g,"\\'")}',this,0.55)">🐢 Slow</button>
+        <button class="btn-rec" id="mrec${i}" onclick="dRec('mrec${i}','mpb${i}')">🎤 Record</button>
+        <button class="btn-pb" id="mpb${i}" onclick="pBlob('mpb${i}')">▶️ Hear Me</button>
+      </div>
+    </div>`).join('');
+}
+
+// COMPLETE
+function showComplete(){
+  const scores=[
+    {ico:'📅',name:'Days of the Week',pct:Math.min(100,Object.keys(dayMCQdone).length*33+20),color:'#C2410C'},
+    {ico:'🔢',name:'Numbers 40–70',pct:Math.min(100,Object.keys(bioDone).length*20+40),color:'#D97706'},
+    {ico:'📖',name:'Comprehension',pct:Math.min(100,Object.keys(compMCQdone).length*20),color:'#0D9488'},
+    {ico:'🪞',name:'Mirror Speaking (15)',pct:Math.min(95,Object.keys(blobs).length*7+15),color:'#7C3AED'}
+  ];
+  document.getElementById('dayScoreCard').innerHTML=`
+    <div style="font-size:.8rem;font-weight:800;color:var(--dk);margin-bottom:12px">📊 Day 8 — Your Progress</div>
+    ${scores.map(s=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:36px;height:36px;border-radius:10px;background:${s.color}18;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0">${s.ico}</div><div style="flex:1"><div style="font-size:.77rem;font-weight:700;color:var(--dk);margin-bottom:4px">${s.name}</div><div class="sk-bar"><div class="sk-fill" style="width:${s.pct}%;background:${s.color}"></div></div></div><div style="font-size:.78rem;font-weight:800;color:${s.color};min-width:35px;text-align:right">${s.pct}%</div></div>`).join('')}
+    <div style="margin-top:14px;background:linear-gradient(135deg,var(--orl),var(--pub));border-radius:12px;padding:13px;text-align:center">
+      <div style="font-size:1.8rem;margin-bottom:5px">🎉📅🗓️</div>
+      <div style="font-size:.88rem;font-weight:800;color:var(--dk);margin-bottom:4px">Day 8 Complete!</div>
+      <div style="font-size:.75rem;color:var(--gy);line-height:1.5">Les jours de la semaine · Numbers 40–70 · Dates & birthdays · French public holidays · 15 mirror sentences · Comprehension · Writing</div>
+    </div>`;
+  confetti();
+  showCoach('🏆 Day 8 DONE! You can now say any date, any birthday, and any day of the week in French. You know about French public holidays. Your French is growing every day!',9000);
+  document.getElementById('dayScoreCard').scrollIntoView({behavior:'smooth'});
+}
+
+// CONFETTI
+function confetti(){
+  const box=document.getElementById('confettiBox');box.style.display='block';box.innerHTML='';
+  const colors=['#C2410C','#D97706','#059669','#7C3AED','#0D9488','#FCD34D'];
+  for(let i=0;i<40;i++){const cf=document.createElement('div');cf.className='cf';cf.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.8}s;animation-duration:${1.5+Math.random()}s`;box.appendChild(cf);}
+  setTimeout(()=>{box.style.display='none';box.innerHTML='';},3000);
+}
+
+// COACH
+function showCoach(msg,dur){const el=document.getElementById('coachMsg');el.textContent=msg;el.classList.add('show');if(cTimer)clearTimeout(cTimer);if(dur>0)cTimer=setTimeout(()=>el.classList.remove('show'),dur);}
+function toggleCoach(){const el=document.getElementById('coachMsg');const msgs=["📅 Days of the week in French are NOT capitalised! lundi, mardi, mercredi — all lowercase.","🔢 Numbers 40–70 follow the same hyphen pattern as 20–39. Quarante = 40, cinquante = 50, soixante = 60.","🎂 French dates = le + number + month. For the 1st of the month, use 'premier' not 'un'!","🔗 Liaison: Nous avons = noozavon. Don't forget to link those sounds!","✍️ Writing in French about real events in your life makes the vocabulary stick forever.","📸 Screenshot your writing! Your coach needs to see your work to help you improve.","💜 Mistakes are how you learn French. Every error you make is one you'll never make again!"];if(el.classList.contains('show'))el.classList.remove('show');else showCoach(msgs[Math.floor(Math.random()*msgs.length)],5000);}
+
+// INIT
+window.addEventListener('load',()=>{
+  window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+  buildDots();
+  renderCopies();renderStoryFills();renderUbar('ubar1','ubar1fb');
+  renderDays();renderDayFills();renderDayMCQ();
+  renderNumbers();renderNumContexts();renderNumDict();
+  renderMonths();renderDateFills();renderHolidays();
+  renderCompMCQ();renderTrous();renderUbar('ubar2','ubar2fb');
+  renderWriting();renderMirrors();
+  setTimeout(()=>showCoach('📅 Bienvenue Day 8! Today you master dates, days of the week, numbers up to 70, and French public holidays. By the end, you can say any date in French!',8000),800);
+});
+</script>
+</body>
+</html>
